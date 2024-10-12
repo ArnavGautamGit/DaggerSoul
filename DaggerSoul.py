@@ -52,11 +52,11 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
             sum_roll -= extra_d6
 
         if hope_roll > fear_roll:
-            result = f"Result = {sum_roll} with HOPE!"
-            await ctx.send("Add a Hope Token to Character Sheet!")
+            result = f"Result = {sum_roll} with HOPE! Add a Hope Token to Character Sheet!"
+            
         else:
-            result = f"Result = {sum_roll} with FEAR!"
-            await ctx.send("Add 1 Fear Token to Action Tracker. (action tracker coming soon)")
+            result = f"Result = {sum_roll} with FEAR! Add a Fear Token to Action Tracker! (Action Tracker Coming Soon)"
+            
     else:
         result = f"It's a Critical Success! Increment Stress and Hope by 1!!"
         
