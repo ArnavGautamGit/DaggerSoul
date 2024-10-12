@@ -19,12 +19,12 @@ async def on_ready():
 
 @bot.command(name='soul')
 async def soul(ctx, dice_input: str):
-    if dice_input.lower() == 'duality':
-        await roll_duality_dice(ctx)
-    elif dice_input.lower() == 'adv duality':
+    if dice_input.lower() == 'duality adv':
         await roll_duality_dice(ctx, advantage=True)
-    elif dice_input.lower() == 'dis duality':
+    elif dice_input.lower() == 'duality dis':
         await roll_duality_dice(ctx, disadvantage=True)
+    elif dice_input.lower() == 'duality':
+        await roll_duality_dice(ctx)
     else:
         match = re.match(r'(\d*)d(\d+)(\+(\d+))?', dice_input)
         if match:
