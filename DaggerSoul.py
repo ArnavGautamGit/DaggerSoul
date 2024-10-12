@@ -19,18 +19,20 @@ async def on_ready():
 
 @bot.command(name='soul')
 async def soul(ctx, dice_input: str):
-    if dice_input.lower() == 'duality adv':
-        await roll_duality_dice(ctx, advantage=True)
-    elif dice_input.lower() == 'duality dis':
-        await roll_duality_dice(ctx, disadvantage=True)
-    elif dice_input.lower() == 'duality':
-        await roll_duality_dice(ctx)
+    match = re.match(r'(adv|dis)?\s*duality', dice_input.lower())
+    if match:
+        if match.group(1) == 'adv':
+            await roll_duality_dice(ctx, advantage=True)
+        elif match.group(1) == 'dis':
+            await roll_duality_dice(ctx, disadvantage=True)
+        else:
+            await roll_duality_dice(ctx)
     else:
         match = re.match(r'(\d*)d(\d+)(\+(\d+))?', dice_input)
         if match:
             await roll_dice(ctx, match)
         else:
-	        ctx.send(f"Invalid dice format. Please write in 'mdn+x' format (for example: '2d6' or '2d6+3'). If you are trying to roll Duality Dice use the command `!soul duality`.")
+            await ctx.send(f"Invalid dice format. Please write in 'mdn+x' format (for example: '2d6' or '2d6+3'). If you are trying to roll Duality Dice use the command `!soul duality`.")
 
 async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
     hope_roll = random.randint(1, 12)
