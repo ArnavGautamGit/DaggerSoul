@@ -21,9 +21,9 @@ async def on_ready():
 async def soul(ctx, dice_input: str):
     if dice_input.lower() == 'duality':
         await roll_duality_dice(ctx)
-    elif dice_input.lower() == 'duality adv':
+    elif dice_input.lower() == 'adv duality':
         await roll_duality_dice(ctx, advantage=True)
-    elif dice_input.lower() == 'duality dis':
+    elif dice_input.lower() == 'dis duality':
         await roll_duality_dice(ctx, disadvantage=True)
     else:
         match = re.match(r'(\d*)d(\d+)(\+(\d+))?', dice_input)
