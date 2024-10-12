@@ -58,8 +58,8 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
             result = f"Result = {sum_roll} with FEAR!"
             await ctx.send("Add 1 Fear Token to Action Tracker. (action tracker coming soon)")
     else:
-        result = "Critical Success!"
-        await ctx.send("Increment your Stress Point by 1 and add a Hope.")
+        result = f"It's a Critical Success! Increment Stress and Hope by 1!!"
+        
     
     await ctx.send(result)
 
