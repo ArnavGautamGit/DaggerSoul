@@ -1,3 +1,5 @@
+# DaggerSoul.py
+
 import discord
 from discord.ext import commands
 import random
@@ -19,7 +21,9 @@ async def on_ready():
 
 @bot.command(name='soul')
 async def soul(ctx, dice_input: str):
-    if dice_input.lower() == 'adv':
+    if dice_input.lower() == 'help':
+	    await soul_help(ctx)
+    elif dice_input.lower() == 'adv':
 	    await roll_duality_dice(ctx, advantage=True)
     elif dice_input.lower() == 'dis':
         await roll_duality_dice(ctx, disadvantage=True)
@@ -79,6 +83,44 @@ async def roll_dice(ctx, match):
 
     await ctx.send(f"Rolling {num_rolls}d{dice_size}{f'+{modifier}' if modifier else ''}: {rolls}")
     await ctx.send(f"Total: {total_roll}")
+
+async def soul_help(ctx):
+    embed = discord.Embed(
+        title="DaggerSoul Bot Commands",
+        description="Here are the commands you can use with the DaggerSoul Bot:",
+        color=0x2F3136  # Dark gray for the embed box
+    )
+
+    embed.add_field(
+        name="`!soul <dice>`",
+        value="Rolls dice of a specified size (e.g., `!soul 2d6+3`).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!soul duality`",
+        value="Rolls the Duality Dice (Hope and Fear).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!soul adv`",
+        value="Rolls the Duality Dice with advantage (extra d6 added).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!soul dis`",
+        value="Rolls the Duality Dice with disadvantage (extra d6 subtracted).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!soul help`",
+        value="Displays this help message.",
+        inline=False
+    )
+
+    embed.set_footer(text="Use the correct format to roll dice (e.g., '2d6+3').")
+    
+    await ctx.send(embed=embed)
+
 
 webserver.keep_alive()
 bot.run(TOKEN) # key must not be stored in the code, rather in the webserver as an environment key
