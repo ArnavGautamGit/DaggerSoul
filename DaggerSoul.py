@@ -21,7 +21,7 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(name="Daggerheart | !soul help"))
 
 @bot.command(name='soul')
-async def soul(ctx, dice_input: str = None):
+async def soul(ctx, dice_input: str = None, *args):
     if not dice_input:
         await soul_help(ctx)
         return
@@ -34,10 +34,16 @@ async def soul(ctx, dice_input: str = None):
         await roll_duality_dice(ctx, disadvantage=True)
     elif dice_input.lower() == 'duality':
         await roll_duality_dice(ctx)
+    elif dice_input.lower() == 'online':
+        await ctx.send("ok")
     else:
+        # Check for advantage or disadvantage in args
+        advantage = 'adv' in [arg.lower() for arg in args]
+        disadvantage = 'dis' in [arg.lower() for arg in args]
+        
         match = re.match(r'(\d*)d(\d+)(\+(\d+))?', dice_input)
         if match:
-            await roll_dice(ctx, match)
+            await roll_dice(ctx, match, advantage, disadvantage)
         else:
             await ctx.send(f"Invalid dice format. Please write in 'mdn+x' format (for example: '2d6' or '2d6+3'). If you are trying to roll Duality Dice use the command `!soul duality`.")
 
@@ -107,7 +113,7 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
     
     await ctx.send(embed=embed)
 
-async def roll_dice(ctx, match):
+async def roll_dice(ctx, match, advantage=False, disadvantage=False):
     num_rolls = int(match.group(1)) if match.group(1) else 1
     dice_size = int(match.group(2))
     modifier = int(match.group(4)) if match.group(4) else 0
@@ -121,6 +127,15 @@ async def roll_dice(ctx, match):
 
     total_roll += modifier
     
+    # Add advantage/disadvantage 
+    extra_d6 = None
+    if advantage:
+        extra_d6 = random.randint(1, 6)
+        total_roll += extra_d6
+    elif disadvantage:
+        extra_d6 = random.randint(1, 6)
+        total_roll -= extra_d6
+    
     # Create an embed for a nicer message
     embed = discord.Embed(
         title=f"Rolling {num_rolls}d{dice_size}{f'+{modifier}' if modifier else ''}",
@@ -130,9 +145,26 @@ async def roll_dice(ctx, match):
     
     embed.add_field(name="Dice Rolls", value=str(rolls), inline=False)
     
+    # Build calculation text
+    calculation_parts = []
+    calculation_parts.append(f"{sum(rolls)} (dice)")
+    
     if modifier:
-        calculation = f"{sum(rolls)} (dice) + {modifier} (modifier) = {total_roll}"
-        embed.add_field(name="Calculation", value=calculation, inline=False)
+        calculation_parts.append(f"{modifier} (modifier)")
+    
+    if extra_d6:
+        if advantage:
+            calculation_parts.append(f"{extra_d6} (advantage d6)")
+        elif disadvantage:
+            calculation_parts.append(f"-{extra_d6} (disadvantage d6)")
+    
+    calculation = " + ".join(calculation_parts)
+    if disadvantage and extra_d6:
+        calculation = calculation.replace(f"-{extra_d6}", f"- {extra_d6}")
+    
+    calculation += f" = {total_roll}"
+    
+    embed.add_field(name="Calculation", value=calculation, inline=False)
     
     embed.set_footer(text=ctx.message.created_at.strftime("%d/%m/%Y %H:%M"))
     
@@ -148,6 +180,16 @@ async def soul_help(ctx):
     embed.add_field(
         name="`!soul <dice>`",
         value="Rolls dice of a specified size (e.g., `!soul 2d6+3`).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!soul <dice> adv`",
+        value="Rolls dice with advantage (adds a d6).",
+        inline=False
+    )
+    embed.add_field(
+        name="`!soul <dice> dis`",
+        value="Rolls dice with disadvantage (subtracts a d6).",
         inline=False
     )
     embed.add_field(
