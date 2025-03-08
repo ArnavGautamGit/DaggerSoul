@@ -49,15 +49,15 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
     
     # Create an embed for a nicer message
     if hope_roll > fear_roll:
-        color = 0x00FFFF  # Cyan/blue for Hope
+        color = 0xFFD700  # Yellow/Gold for Hope
         result_type = "Hope"
         result_message = "Add a Hope Token to Character Sheet!"
         emoji = "✨"
     elif fear_roll > hope_roll:
-        color = 0xFF4500  # Red/orange for Fear
+        color = 0x9932CC  # Dark Purple for Fear
         result_type = "Fear"
         result_message = "Add a Fear Token!"
-        emoji = "⚠️"
+        emoji = "💀"
     else:
         color = 0xFFD700  # Gold for Critical Success
         result_type = "Critical Success"
@@ -88,7 +88,7 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
         dice_info.append(("Disadvantage", f"(d6) → -{extra_d6}"))
         embed.title = f"[ {sum_roll} with {result_type} {emoji} ]"
     
-    embed.add_field(name=f"{emoji} **Player {result_type} Dice**", value="", inline=False)
+    embed.add_field(name=f"{emoji} **Rolled with {result_type}**", value="", inline=False)
     
     # Add base information
     embed.add_field(name="Base", value="(d12)", inline=False)
@@ -142,7 +142,7 @@ async def soul_help(ctx):
     embed = discord.Embed(
         title="DaggerSoul Bot Commands",
         description="Here are the commands you can use with the DaggerSoul Bot:",
-        color=0x2F3136  # Dark gray for the embed box
+        color=0x00FFFF  # Blue for Help
     )
 
     embed.add_field(
