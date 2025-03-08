@@ -1,4 +1,4 @@
-# DaggerSoul.py
+#DaggerSoul.py
 
 import discord
 from discord.ext import commands
@@ -7,7 +7,7 @@ import re
 import os
 import webserver
 
-TOKEN = os.environ['discordkey'] # hides the Diskord token as an environment key
+TOKEN = os.environ['discordkey'] # hides the Discord token as an environment key
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -18,13 +18,18 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+    await bot.change_presence(activity=discord.Game(name="Daggerheart | !soul help"))
 
 @bot.command(name='soul')
-async def soul(ctx, dice_input: str):
+async def soul(ctx, dice_input: str = None):
+    if not dice_input:
+        await soul_help(ctx)
+        return
+        
     if dice_input.lower() == 'help':
-	    await soul_help(ctx)
+        await soul_help(ctx)
     elif dice_input.lower() == 'adv':
-	    await roll_duality_dice(ctx, advantage=True)
+        await roll_duality_dice(ctx, advantage=True)
     elif dice_input.lower() == 'dis':
         await roll_duality_dice(ctx, disadvantage=True)
     elif dice_input.lower() == 'duality':
@@ -34,38 +39,73 @@ async def soul(ctx, dice_input: str):
         if match:
             await roll_dice(ctx, match)
         else:
-	        ctx.send(f"Invalid dice format. Please write in 'mdn+x' format (for example: '2d6' or '2d6+3'). If you are trying to roll Duality Dice use the command `!soul duality`.")
+            await ctx.send(f"Invalid dice format. Please write in 'mdn+x' format (for example: '2d6' or '2d6+3'). If you are trying to roll Duality Dice use the command `!soul duality`.")
 
 async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
     hope_roll = random.randint(1, 12)
     fear_roll = random.randint(1, 12)
-
-    await ctx.send(f"Rolling the Duality Dice...")
-    await ctx.send(f"Hope Die: {hope_roll}")
-    await ctx.send(f"Fear Die: {fear_roll}")
-
-    if hope_roll != fear_roll:
-        sum_roll = hope_roll + fear_roll
-        if advantage:
-            extra_d6 = random.randint(1, 6)
-            await ctx.send(f"Advantage: Rolling extra d6 = {extra_d6}")
-            sum_roll += extra_d6
-        elif disadvantage:
-            extra_d6 = random.randint(1, 6)
-            await ctx.send(f"Disadvantage: Rolling extra d6 = {extra_d6}")
-            sum_roll -= extra_d6
-
-        if hope_roll > fear_roll:
-            result = f"Result = {sum_roll} with HOPE! Add a Hope Token to Character Sheet!"
-            
-        else:
-            result = f"Result = {sum_roll} with FEAR! Add a Fear Token to Action Tracker! (Action Tracker Coming Soon)"
-            
-    else:
-        result = f"It's a Critical Success! Increment Stress and Hope by 1!!"
-        
+    extra_d6 = None
+    sum_roll = hope_roll + fear_roll
     
-    await ctx.send(result)
+    # Create an embed for a nicer message
+    if hope_roll > fear_roll:
+        color = 0x00FFFF  # Cyan/blue for Hope
+        result_type = "Hope"
+        result_message = "Add a Hope Token to Character Sheet!"
+        emoji = "✨"
+    elif fear_roll > hope_roll:
+        color = 0xFF4500  # Red/orange for Fear
+        result_type = "Fear"
+        result_message = "Add a Fear Token!"
+        emoji = "⚠️"
+    else:
+        color = 0xFFD700  # Gold for Critical Success
+        result_type = "Critical Success"
+        result_message = "Increment Stress and Hope by 1!!"
+        emoji = "🌟"
+    
+    embed = discord.Embed(
+        title=f"[ {sum_roll} with {result_type} {emoji} ]",
+        description=result_message,
+        color=color
+    )
+    
+    # Add dice information
+    dice_info = [
+        ("**Dice to Roll**", ""),
+        ("Hope", f"(d12) → {hope_roll}"),
+        ("Fear", f"(d12) → {fear_roll}")
+    ]
+    
+    if advantage:
+        extra_d6 = random.randint(1, 6)
+        sum_roll += extra_d6
+        dice_info.append(("Advantage", f"(d6) → +{extra_d6}"))
+        embed.title = f"[ {sum_roll} with {result_type} {emoji} ]"
+    elif disadvantage:
+        extra_d6 = random.randint(1, 6)
+        sum_roll -= extra_d6
+        dice_info.append(("Disadvantage", f"(d6) → -{extra_d6}"))
+        embed.title = f"[ {sum_roll} with {result_type} {emoji} ]"
+    
+    embed.add_field(name=f"{emoji} **Player {result_type} Dice**", value="", inline=False)
+    
+    # Add base information
+    embed.add_field(name="Base", value="(d12)", inline=False)
+    
+    # Add dice roll section
+    rolls_text = "\n".join([f"{name}: {value}" for name, value in dice_info if name and value])
+    if rolls_text:
+        embed.add_field(name="Dice Rolls", value=rolls_text, inline=False)
+    
+    # Add result section
+    result_text = f"Hope: {hope_roll}(d12), Fear: {fear_roll}, Mod: +0\n= {sum_roll}"
+    embed.add_field(name="Result", value=result_text, inline=False)
+    
+    # Add timestamp (matches the competitor's format)
+    embed.set_footer(text=ctx.message.created_at.strftime("%d/%m/%Y %H:%M"))
+    
+    await ctx.send(embed=embed)
 
 async def roll_dice(ctx, match):
     num_rolls = int(match.group(1)) if match.group(1) else 1
@@ -80,9 +120,23 @@ async def roll_dice(ctx, match):
         total_roll += roll
 
     total_roll += modifier
-
-    await ctx.send(f"Rolling {num_rolls}d{dice_size}{f'+{modifier}' if modifier else ''}: {rolls}")
-    await ctx.send(f"Total: {total_roll}")
+    
+    # Create an embed for a nicer message
+    embed = discord.Embed(
+        title=f"Rolling {num_rolls}d{dice_size}{f'+{modifier}' if modifier else ''}",
+        description=f"**Result: {total_roll}**",
+        color=0x7289DA  # Discord blurple color
+    )
+    
+    embed.add_field(name="Dice Rolls", value=str(rolls), inline=False)
+    
+    if modifier:
+        calculation = f"{sum(rolls)} (dice) + {modifier} (modifier) = {total_roll}"
+        embed.add_field(name="Calculation", value=calculation, inline=False)
+    
+    embed.set_footer(text=ctx.message.created_at.strftime("%d/%m/%Y %H:%M"))
+    
+    await ctx.send(embed=embed)
 
 async def soul_help(ctx):
     embed = discord.Embed(
@@ -118,9 +172,8 @@ async def soul_help(ctx):
     )
 
     embed.set_footer(text="Use the correct format to roll dice (e.g., '2d6+3').")
-    
-    await ctx.send(embed=embed)
 
+    await ctx.send(embed=embed)
 
 webserver.keep_alive()
 bot.run(TOKEN) # key must not be stored in the code, rather in the webserver as an environment key
