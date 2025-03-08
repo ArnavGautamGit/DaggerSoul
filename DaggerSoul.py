@@ -198,12 +198,12 @@ async def soul_help(ctx):
         inline=False
     )
     embed.add_field(
-        name="`!soul duality adv` or `!soul adv`",
+        name="`!soul adv`",
         value="Rolls the Duality Dice with advantage (extra d6 added).",
         inline=False
     )
     embed.add_field(
-        name="`!soul duality dis` or `!soul dis`",
+        name="`!soul dis`",
         value="Rolls the Duality Dice with disadvantage (extra d6 subtracted).",
         inline=False
     )
