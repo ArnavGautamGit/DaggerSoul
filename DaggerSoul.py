@@ -83,7 +83,7 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
     else:
         color = 0xFFD700  # Gold for Critical Success
         result_type = "Critical Success"
-        result_message = "Increment Stress and Hope by 1!!"
+        result_message = "Take a Hope Token & Clear a Stress Slot!!"
         emoji = "🌟"
     
     embed = discord.Embed(
