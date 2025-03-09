@@ -78,7 +78,7 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
     elif fear_roll > hope_roll:
         color = 0x9932CC  # Dark Purple for Fear
         result_type = "Fear"
-        result_message = "Add a Fear Token!"
+        result_message = "GM takes 1d4 Fear Token! (Bonus Token if squad > 4)"
         emoji = "💀"
     else:
         color = 0xFFD700  # Gold for Critical Success
