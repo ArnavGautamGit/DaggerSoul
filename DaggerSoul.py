@@ -71,7 +71,7 @@ async def roll_duality_dice(ctx, advantage=False, disadvantage=False):
     
     # Create an embed for a nicer message
     if hope_roll > fear_roll:
-        color = 0xFFD700  # Yellow/Gold for Hope
+        color = 0xFF6E00  # Orange for Hope
         result_type = "Hope"
         result_message = "Add a Hope Token to Character Sheet!"
         emoji = "✨"
