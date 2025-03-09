@@ -12,13 +12,29 @@ TOKEN = os.environ['discordkey'] # hides the Discord token as an environment key
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+# Enable receiving messages from other bots
+intents.messages = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+# Allow the bot to receive messages from other bots
+bot.allowed_mentions = discord.AllowedMentions(everyone=False, users=True, roles=False, replied_user=True)
 
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
     await bot.change_presence(activity=discord.Game(name="Daggerheart | !soul help"))
+
+@bot.event
+async def on_message(message):
+    # Process commands even if the message is from a bot
+    if message.author.bot:
+        # Only process the specific command we want bots to use
+        if message.content.startswith('!soul online'):
+            ctx = await bot.get_context(message)
+            await soul(ctx, 'online')
+    else:
+        # Process all commands for non-bot users
+        await bot.process_commands(message)
 
 @bot.command(name='soul')
 async def soul(ctx, dice_input: str = None, *args):
@@ -210,6 +226,11 @@ async def soul_help(ctx):
     embed.add_field(
         name="`!soul help` or `!soul`",
         value="Displays this help message.",
+        inline=False
+    )
+    embed.add_field(
+        name="`!soul online`",
+        value="Used by other bots to ping DaggerSoul.",
         inline=False
     )
 
